@@ -8,31 +8,34 @@ This hands-on lab starts with ML steps such as data preparing, model training, a
 - `ggv2-deploy-on-device`: IoT part (AWS IoT Greengrass 2.0)
 
 ## 1. ML Part: Compile your ML model using Pytorch Framework and Amazon SageMaker
+
 In the ML part, you can freely prepare your own data, organize a folder, and execute the code, so that even ML beginners can easily train/compile your own model. Does your data exceed gigabytes? In consideration of large data, PyTorch DDP-based distributed learning was also implemented.
 
 Let's take an example of raw image folder .
 
-Example 1) Training a dog and cat classification model
+**Example 1)** Training a dog and cat classification model
 ```
 raw
 ├── cat
 └── dog
 ```
 
-Example 2) Example of good/defective distinction in the production line
+**Example 2)** Example of good/defective distinction in the production line (Included in the `ggv2-deploy-on-device/raw` folder)
+
 ```
 raw
-├── brown_abnormal_chinese
-├── brown_abnormal_korean
-├── brown_normal_chinese
-├── brown_normal_korean
-├── no_box
-├── red_abnormal
-└── red_normal
+├── brown_abnormal_chinese: Chinese characters are written on the brown product box and it is abnormal.
+├── brown_abnormal_korean: Korean characters are written on the brown product box and it is abnormal.
+├── brown_normal_chinese: Chinese characters are written on the brown product box and it is normal.
+├── brown_normal_korean: Korean characters are written on the brown product box and it is normal.
+├── no_box: There are no boxes. However, sometimes you can see the box edges.
+├── red_abnormal: Red product box and it is abnormal.
+└── red_normal: Red product box and it is normal.
 ```
 
-Please refer to the image folder corresponding to Example 2 for reference.
-Note that the image data was taken by the author himself, and images from the Internet were not used at all.
+Note: This dataset was taken by the author himself with a NVIDIA Jetson nano CSI camera in preparation for AWS IoT Smart Factory Demo and images from the Internet were not used at all.. This dataset was made possible with the help of Turck Korea(https://www.turck.kr/).
+Please refer to the raw dataset folder(`ggv2-deploy-on-device/raw`) corresponding to Example 2 for reference.
+- Reference: [AWS Smart Factory with Turck Korea](https://www.youtube.com/watch?v=R0sMMphzOhw)
 
 
 ## 2. IoT Part: On-Device ML Inference with AWS IoT Greengrass 2.0’
@@ -68,7 +71,7 @@ $ cd artifacts
 $ chmod +x run.sh run_flask.sh
 
 # No Camera: Real-time inference for samples images
-$ ./run.sh -c 0 -g 0
+$ ./run.sh -c 0
 
 # Camera: Real-time inference 
 $ ./run.sh -c 1 
@@ -85,3 +88,7 @@ $ ./run_flask.sh -i [YOUR-DEVICE-IP] -p [YOUR-PORT]
 ```
 $ ./create_gg_component.sh
 ```
+
+## License Summary
+
+This sample code is provided under the MIT-0 license. See the LICENSE file.
