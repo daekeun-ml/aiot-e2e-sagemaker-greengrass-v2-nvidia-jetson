@@ -32,7 +32,19 @@ echo topic: $TOPIC
 echo zip archive name: $ZIP_ARCHIVE_NAME
 echo .
 
-# # json recipe
+# s3 bucket
+S3_PATH="s3://${S3_BUCKET}/${S3_PREFIX}"
+S3_FILEPATH="${S3_PATH}/${ZIP_ARCHIVE_NAME}.zip"
+S3_FILEPATH2=${S3_FILEPATH//\//\\/}
+
+if aws s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null; then
+    echo ==--------Bucket Already Exists---------==
+else
+    echo ==--------Create S3 Bucket---------==   
+    aws s3 mb $S3_PATH
+fi
+
+# json recipe
 echo ==--------JSON Recipe---------==
 cd recipes
 OLD_RECIPE_JSON=$(ls ${COMPONENT_NAME}*.json)
@@ -40,8 +52,7 @@ NEW_RECIPE_JSON=${COMPONENT_NAME}-${COMPONENT_VERSION}.json
 mv ${OLD_RECIPE_JSON} ${NEW_RECIPE_JSON}
 
 sed -i "s/\(\"UseGPU\"\)\(.*\)/\1: \"${USE_GPU}\",/g" ${NEW_RECIPE_JSON}
-# sed -i "s/\[YOUR-BUCKET\]/${S3_BUCKET}/g" ${NEW_RECIPE_JSON}
-# sed -i "s/\[YOUR-PREFIX\]/${S3_PREFIX2}/g" ${NEW_RECIPE_JSON} 
+sed -i "s/\(\"URI\"\)\(.*\)/\1: \"${S3_FILEPATH2}\",/g" ${NEW_RECIPE_JSON}
 sed -i "s/my-model/${ZIP_ARCHIVE_NAME}/g" ${NEW_RECIPE_JSON} 
 # sed -i "s/ml\/example\/imgclassification/${TOPIC2}/g" ${NEW_RECIPE_JSON} 
 sed -i "s/\(\"ComponentVersion\"\)\(.*\)/\1: \"${COMPONENT_VERSION}\",/g" ${NEW_RECIPE_JSON}
@@ -69,9 +80,9 @@ echo .
 echo ==--------Compress Artifacts---------==
 cd artifacts
 zip ${ZIP_ARCHIVE_NAME}.zip -r .
-S3_PATH="s3://${S3_BUCKET}/${S3_PREFIX}/${ZIP_ARCHIVE_NAME}.zip"
-echo Uploading to $S3_PATH
-aws s3 cp ${ZIP_ARCHIVE_NAME}.zip s3://${S3_BUCKET}/${S3_PREFIX}/${ZIP_ARCHIVE_NAME}.zip
+
+echo ==--------Uploading to $S3_FILEPATH---------== 
+aws s3 cp ${ZIP_ARCHIVE_NAME}.zip ${S3_FILEPATH}
 rm ${ZIP_ARCHIVE_NAME}.zip
 echo .
 
